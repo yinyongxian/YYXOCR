@@ -11,7 +11,7 @@ namespace YYXOCR
 {
     public partial class MainForm : Form
     {
-        private OpenFileDialog openFileDialog = new OpenFileDialog()
+        private readonly OpenFileDialog openFileDialog = new OpenFileDialog()
         {
             Multiselect = false
         };
@@ -31,13 +31,14 @@ namespace YYXOCR
                 try
                 {
                     var bitmap = new Bitmap(fileName);
-                    var pictureBox = new PictureBox
-                    {
-                        Image = bitmap,
-                        Dock = DockStyle.Fill,
-                        SizeMode = PictureBoxSizeMode.CenterImage
-                    };
-                    splitContainer.Panel1.Controls.Add(pictureBox);
+
+                    AddPictureBox(bitmap);
+
+                    var blackAndWhiteBitmap = bitmap.ToBlackAndWhite();
+                    var text = TesseractConvert.ToText(blackAndWhiteBitmap);
+
+                    AddRichTextBox(text);
+
                 }
                 catch (Exception exception)
                 {
@@ -45,6 +46,28 @@ namespace YYXOCR
                     throw;
                 }
             }
+        }
+
+        private void AddPictureBox(Bitmap bitmap)
+        {
+            var pictureBox = new PictureBox
+            {
+                Image = bitmap,
+                Dock = DockStyle.Fill,
+                SizeMode = PictureBoxSizeMode.CenterImage
+            };
+            splitContainer.Panel1.Controls.Add(pictureBox);
+        }
+
+        private void AddRichTextBox(string text)
+        {
+            var richTextBox = new RichTextBox
+            {
+                BorderStyle = BorderStyle.FixedSingle,
+                Dock = DockStyle.Fill,
+                Text = text
+            };
+            splitContainer.Panel2.Controls.Add(richTextBox);
         }
     }
 }
