@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace YYXOCR
@@ -23,10 +19,23 @@ namespace YYXOCR
 
         private void toolStripButtonOpen_Click(object sender, EventArgs e)
         {
+            splitContainer.Panel1.Controls.Clear();
+            splitContainer.Panel2.Controls.Clear();
+
             var dialogResult = openFileDialog.ShowDialog();
             if (dialogResult == DialogResult.OK)
             {
                 var fileName = openFileDialog.FileName;
+
+                Convert(fileName);
+            }
+        }
+
+        private void Convert(string fileName)
+        {
+            Task.Factory.StartNew(() =>
+            {
+                SetStatusLabel(@"解析中...");
 
                 try
                 {
@@ -34,8 +43,7 @@ namespace YYXOCR
 
                     AddPictureBox(bitmap);
 
-                    var blackAndWhiteBitmap = bitmap.ToBlackAndWhite();
-                    var text = TesseractConvert.ToText(blackAndWhiteBitmap);
+                    var text = TesseractConvert.ToText(bitmap);
 
                     AddRichTextBox(text);
 
@@ -45,29 +53,47 @@ namespace YYXOCR
                     Console.WriteLine(exception);
                     throw;
                 }
-            }
+                finally
+                {
+                    SetStatusLabel(string.Empty);
+                }
+            });
+        }
+
+        private void SetStatusLabel(string text)
+        {
+            BeginInvoke(new Action(() =>
+            {
+                toolStripStatusLabel.Text = text;
+            }));
         }
 
         private void AddPictureBox(Bitmap bitmap)
         {
-            var pictureBox = new PictureBox
+            BeginInvoke(new Action(() =>
             {
-                Image = bitmap,
-                Dock = DockStyle.Fill,
-                SizeMode = PictureBoxSizeMode.CenterImage
-            };
-            splitContainer.Panel1.Controls.Add(pictureBox);
+                var pictureBox = new PictureBox
+                {
+                    Image = bitmap,
+                    Dock = DockStyle.Fill,
+                    SizeMode = PictureBoxSizeMode.Zoom
+                };
+                splitContainer.Panel1.Controls.Add(pictureBox);
+            }));
         }
 
         private void AddRichTextBox(string text)
         {
-            var richTextBox = new RichTextBox
+            BeginInvoke(new Action(() =>
             {
-                BorderStyle = BorderStyle.FixedSingle,
-                Dock = DockStyle.Fill,
-                Text = text
-            };
-            splitContainer.Panel2.Controls.Add(richTextBox);
+                var richTextBox = new RichTextBox
+                {
+                    BorderStyle = BorderStyle.None,
+                    Dock = DockStyle.Fill,
+                    Text = text
+                };
+                splitContainer.Panel2.Controls.Add(richTextBox);
+            }));
         }
     }
 }
