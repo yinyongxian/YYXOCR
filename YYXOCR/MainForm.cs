@@ -40,9 +40,11 @@ namespace YYXOCR
                 try
                 {
                     var bitmap = new Bitmap(fileName);
-                    var text = TesseractConvert.ToText(bitmap);
 
                     AddPictureBox(bitmap);
+
+                    var text = TesseractConvert.ToText(bitmap);
+
                     AddRichTextBox(text);
 
                 }
