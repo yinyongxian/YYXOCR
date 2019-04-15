@@ -7,7 +7,7 @@ namespace YYXOCR
 {
     public partial class MainForm : Form
     {
-        private readonly OpenFileDialog openFileDialog = new OpenFileDialog()
+        private readonly OpenFileDialog openFileDialog = new OpenFileDialog
         {
             Multiselect = false
         };
@@ -33,18 +33,16 @@ namespace YYXOCR
 
         private void Convert(string fileName)
         {
+            SetStatusLabel(@"解析中...");
+
             Task.Factory.StartNew(() =>
             {
-                SetStatusLabel(@"解析中...");
-
                 try
                 {
                     var bitmap = new Bitmap(fileName);
-
-                    AddPictureBox(bitmap);
-
                     var text = TesseractConvert.ToText(bitmap);
 
+                    AddPictureBox(bitmap);
                     AddRichTextBox(text);
 
                 }
